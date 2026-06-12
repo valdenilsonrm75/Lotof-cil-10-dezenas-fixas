@@ -3,85 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desmembrador Lotofácil</title>
+<title>Lotofácil GTA</title>
 
 <style>
 body{
     font-family: Arial, sans-serif;
-    margin:15px;
-    background:#f0f2f5;
+    background:#0d0d0d;
+    color:#fff;
+    margin:0;
+    padding:10px;
 }
 
-h2{
+/* TÍTULO GTA */
+h1{
     text-align:center;
+    font-size:24px;
+    font-weight:900;
+    text-transform:uppercase;
+    color:#00ff6a;
+    text-shadow:0 0 10px #00ff6a, 0 0 20px #00ff6a;
+    margin-bottom:10px;
 }
 
-textarea,input{
+.box{
+    background:#1a1a1a;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.numeros{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:5px;
+}
+
+.numero{
+    background:#333;
+    padding:10px;
+    text-align:center;
+    border-radius:6px;
+    cursor:pointer;
+    user-select:none;
+}
+
+.numero.ativo{
+    background:#00ff6a;
+    color:#000;
+    font-weight:bold;
+}
+
+select, input{
     width:100%;
     padding:10px;
-    margin-bottom:10px;
+    margin-top:6px;
+    border-radius:6px;
     font-size:16px;
-    box-sizing:border-box;
-}
-
-textarea{
-    height:80px;
 }
 
 button{
     width:100%;
     padding:12px;
-    margin-top:5px;
-    font-size:16px;
+    margin-top:10px;
     border:none;
-    border-radius:5px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:bold;
+    background:#00ff6a;
+    color:#000;
     cursor:pointer;
 }
 
-.gerar{
-    background:#28a745;
-    color:white;
-}
-
-.limpar{
-    background:#dc3545;
-    color:white;
-}
-
-#resultado{
-    margin-top:20px;
-}
-
-.jogo{
-    background:white;
+.resultado{
+    margin-top:10px;
     padding:10px;
-    margin-bottom:8px;
-    border-radius:5px;
-    box-shadow:0 0 5px rgba(0,0,0,0.2);
+    background:#111;
+    border-radius:8px;
+}
+.jogo{
+    padding:8px;
+    margin-bottom:6px;
+    background:#222;
+    border-radius:6px;
 }
 </style>
 </head>
+
 <body>
 
-<h2>Desmembrador Lotofácil</h2>
+<h1>💲LOTOFÁCIL COM 10 FIXAS </h1💲>
 
-<label>10 dezenas fixas</label>
-<textarea id="fixas">01,02,03,04,05,06,07,08,09,10</textarea>
+<div class="box">
+    <strong>Escolha as 10 dezenas fixas:</strong>
+    <div class="numeros" id="numeros"></div>
+</div>
 
-<label>15 dezenas variáveis</label>
-<textarea id="variaveis">11,12,13,14,15,16,17,18,19,20,21,22,23,24,25</textarea>
+<div class="box">
+    <strong>Quantidade por jogo:</strong>
+    <select id="grupo">
+        <option value="5">5 dezenas</option>
+        <option value="6">6 dezenas</option>
+        <option value="7">7 dezenas</option>
+        <option value="8">8 dezenas</option>
+    </select>
 
-<label>Quantidade de jogos</label>
-<input type="number" id="qtdJogos" value="20" min="1">
+    <strong>Quantos jogos deseja gerar?</strong>
+    <input type="number" id="qtdJogos" value="5" min="1" max="100">
 
-<button class="gerar" onclick="gerarJogos()">Gerar Jogos</button>
-<button class="limpar" onclick="limparTudo()">Limpar</button>
+    <button onclick="gerar()">GERAR JOGOS</button>
 
-<div id="resultado"></div>
+    <div class="resultado" id="resultado"></div>
+</div>
 
 <script>
+const container = document.getElementById("numeros");
+let selecionados = [];
 
-function embaralhar(array){
-    let arr = [...array];
+// cria 1 a 25
+for(let i=1;i<=25;i++){
+    let div = document.createElement("div");
+    div.classList.add("numero");
+    div.innerText = i;
 
-    for(let i = arr.length - 1; i >
+    div.onclick = () => {
+        if(div.classList.contains("ativo")){
+            div.classList.remove("ativo");
+            selecionados = selecionados.filter(n => n != i);
+        } else {
+            if(selecionados.length < 10){
+                div.classList.add("ativo");
+                selecionados.push(i);
+            } else {
+                alert("Você já escolheu 10 dezenas fixas!");
+            }
+        }
+    };
+
+    container.appendChild(div);
+}
+
+function embaralhar(arr){
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function ordenar(arr){
+    return arr.sort((a,b)=>a-b);
+}
+
+function gerar(){
+    if(selecionados.length != 10){
+        alert("Escolha exatamente 10 dezenas fixas!");
+        return;
+    }
+
+    let grupo = parseInt(document.getElementById("grupo").value);
+    let qtdJogos = parseInt(document.getElementById("qtdJogos").value);
+
+    let todas = Array.from({length:25}, (_,i)=>i+1);
+    let variaveis = todas.filter(n => !selecionados.includes(n));
+
+    let html = "";
+
+    for(let j=0;j<qtdJogos;j++){
+
+        let extras = embaralhar(variaveis).slice(0, grupo);
+        let jogo = selecionados.concat(extras);
+
+        jogo = ordenar(jogo);
+
+        html += `<div class="jogo"><strong>Jogo ${j+1}:</strong><br>${jogo.join(" - ")}</div>`;
+    }
+
+    document.getElementById("resultado").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
